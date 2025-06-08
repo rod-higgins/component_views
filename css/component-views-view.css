@@ -1,0 +1,243 @@
+/* Component Views View Styles */
+
+.view-with-component-fields {
+  position: relative;
+}
+
+.view-with-component-fields .views-row {
+  margin-bottom: 1.5rem;
+}
+
+/* Component list page styles */
+.component-views-component-list {
+  padding: 1rem 0;
+}
+
+.component-list-title {
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.component-list-description {
+  margin-bottom: 1.5rem;
+  color: #666;
+  line-height: 1.6;
+}
+
+.component-list-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.component-list-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.component-list-card:hover {
+  border-color: #1976d2;
+  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.15);
+  transform: translateY(-2px);
+}
+
+.component-card-header {
+  margin-bottom: 1rem;
+}
+
+.component-card-title {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+  display: flex;
+  align-items: center;
+}
+
+.component-card-type {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 0.875rem;
+  color: #666;
+  background: #f8f9fa;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.component-card-description {
+  margin-bottom: 1rem;
+  color: #666;
+  line-height: 1.5;
+}
+
+.component-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.component-props-count {
+  font-weight: 500;
+  color: #1976d2;
+}
+
+.component-card-separator {
+  color: #ccc;
+}
+
+.component-source {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 0.75rem;
+}
+
+.component-card-props {
+  margin-top: 1rem;
+}
+
+.component-card-props summary {
+  cursor: pointer;
+  font-weight: 500;
+  color: #1976d2;
+  padding: 0.5rem 0;
+}
+
+.component-props-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0 0;
+  background: #f8f9fa;
+  border-radius: 4px;
+  padding: 0.75rem;
+}
+
+.component-prop-item {
+  padding: 0.25rem 0;
+  font-size: 0.875rem;
+}
+
+.prop-type {
+  color: #666;
+  font-style: italic;
+}
+
+.prop-description {
+  color: #666;
+}
+
+.component-list-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #666;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+/* Usage statistics styles */
+.component-views-usage-stats {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1rem 0;
+}
+
+.usage-stats-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.usage-stats-summary {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.stat-separator {
+  color: #ccc;
+}
+
+.usage-stats-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.usage-stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.usage-stat-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.component-name {
+  font-weight: 500;
+  color: #333;
+}
+
+.usage-count {
+  font-weight: 600;
+  color: #1976d2;
+}
+
+.usage-stat-bar {
+  height: 8px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.usage-stat-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #1976d2, #42a5f5);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.usage-stats-empty {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .component-list-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .usage-stats-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .usage-stats-summary {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}

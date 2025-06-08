@@ -1,0 +1,58 @@
+base:
+  css:
+    theme:
+      css/component-views-base.css: {}
+  dependencies:
+    - core/drupal
+
+field:
+  css:
+    theme:
+      css/component-views-field.css: {}
+  js:
+    js/component-views-field.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - component_views/base
+
+view:
+  css:
+    theme:
+      css/component-views-view.css: {}
+  js:
+    js/component-views-view.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - component_views/base
+
+animations:
+  css:
+    theme:
+      css/component-views-animations.css: {}
+  dependencies:
+    - component_views/base
+
+admin:
+  css:
+    theme:
+      css/component-views-admin.css: {}
+  js:
+    js/component-views-admin.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/drupalSettings
+    - component_views/base
+
+filter:
+  css:
+    theme:
+      css/component-views-filter.css: {}
+  js:
+    js/component-views-filter.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - component_views/base

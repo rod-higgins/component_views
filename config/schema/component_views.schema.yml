@@ -1,0 +1,85 @@
+views.field.component_field:
+  type: views_field
+  label: 'Component field settings'
+  mapping:
+    display_mode:
+      type: string
+      label: 'Display mode'
+    component_filter:
+      type: string
+      label: 'Component filter'
+    limit_components:
+      type: integer
+      label: 'Component limit'
+    show_wrapper:
+      type: boolean
+      label: 'Show wrapper'
+    enable_animation:
+      type: boolean
+      label: 'Enable animation'
+    component_classes:
+      type: string
+      label: 'CSS classes'
+
+views.filter.component_type:
+  type: views_filter
+  label: 'Component type filter settings'
+  mapping:
+    expose:
+      type: mapping
+      mapping:
+        multiple:
+          type: boolean
+          label: 'Multiple selection'
+        remember:
+          type: boolean
+          label: 'Remember selection'
+        placeholder:
+          type: string
+          label: 'Placeholder text'
+
+views.argument.component_type:
+  type: views_argument
+  label: 'Component type argument settings'
+  mapping:
+    validate_component:
+      type: boolean
+      label: 'Validate component exists'
+    transform_dashes:
+      type: boolean
+      label: 'Transform dashes'
+    case_sensitive:
+      type: boolean
+      label: 'Case sensitive'
+    component_redirect:
+      type: boolean
+      label: 'Redirect invalid components'
+
+views.display.component_display:
+  type: views_display
+  label: 'Component display settings'
+  mapping:
+    component_optimization:
+      type: boolean
+      label: 'Component optimization'
+    component_preload:
+      type: boolean
+      label: 'Component preload'
+    component_lazy_load:
+      type: boolean
+      label: 'Lazy loading'
+    component_cache_strategy:
+      type: string
+      label: 'Cache strategy'
+    component_batch_size:
+      type: integer
+      label: 'Batch size'
+    component_grouping:
+      type: boolean
+      label: 'Component grouping'
+    component_animation:
+      type: boolean
+      label: 'Component animation'
+    component_responsive:
+      type: boolean
+      label: 'Responsive features'

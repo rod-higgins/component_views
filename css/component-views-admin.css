@@ -1,0 +1,35 @@
+/* Component Views Admin Styles */
+
+.component-views-admin {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 1rem;
+}
+
+.component-views-admin .form-item {
+  margin-bottom: 1rem;
+}
+
+.component-views-admin .form-item label {
+  font-weight: 600;
+  color: #333;
+}
+
+.component-views-admin .description {
+  font-size: 0.875rem;
+  color: #666;
+  margin-top: 0.25rem;
+}
+
+.component-views-stats {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+.component-views-stats p {
+  margin: 0.5rem 0;
+}

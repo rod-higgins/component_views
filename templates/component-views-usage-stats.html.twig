@@ -1,0 +1,48 @@
+{#
+/**
+ * @file
+ * Template for displaying component usage statistics.
+ *
+ * Available variables:
+ * - stats: Array of component usage statistics
+ * - total_usage: Total usage count across all components
+ * - total_components: Total number of available components
+ */
+#}
+
+<div class="component-views-usage-stats">
+  <div class="usage-stats-header">
+    <h3>Component Usage Statistics</h3>
+    <div class="usage-stats-summary">
+      <span class="stat-item">
+        <strong>{{ total_components }}</strong> components available
+      </span>
+      <span class="stat-separator">•</span>
+      <span class="stat-item">
+        <strong>{{ total_usage }}</strong> total uses
+      </span>
+    </div>
+  </div>
+  
+  {% if stats %}
+    <div class="usage-stats-chart">
+      {% set max_usage = stats|first %}
+      {% for component_type, usage_count in stats %}
+        {% set percentage = max_usage > 0 ? (usage_count / max_usage * 100)|round : 0 %}
+        <div class="usage-stat-item">
+          <div class="usage-stat-label">
+            <span class="component-name">{{ component_type }}</span>
+            <span class="usage-count">{{ usage_count }}</span>
+          </div>
+          <div class="usage-stat-bar">
+            <div class="usage-stat-fill" style="width: {{ percentage }}%"></div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="usage-stats-empty">
+      <p>No component usage data available.</p>
+    </div>
+  {% endif %}
+</div>

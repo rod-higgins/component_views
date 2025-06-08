@@ -1,0 +1,413 @@
+<?php
+
+/**
+ * @file
+ * Enhanced Views integration for Component Field module.
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Element;
+
+/**
+ * Implements hook_views_data().
+ */
+function component_views_views_data() {
+  $data = [];
+  
+  try {
+    // Get all component field storage configs
+    $field_storage_configs = \Drupal::entityTypeManager()
+      ->getStorage('field_storage_config')
+      ->loadByProperties(['type' => 'component_field']);
+
+    foreach ($field_storage_configs as $field_storage) {
+      $entity_type = $field_storage->getTargetEntityTypeId();
+      $field_name = $field_storage->getName();
+      $table_name = $entity_type . '__' . $field_name;
+      
+      // Component Type field
+      $data[$table_name][$field_name . '_component_type'] = [
+        'title' => t('@field Component Type', ['@field' => $field_storage->label()]),
+        'help' => t('The type of component being used.'),
+        'field' => [
+          'id' => 'component_field',
+          'field_name' => $field_name,
+        ],
+        'filter' => [
+          'id' => 'component_type',
+          'field_name' => $field_name,
+        ],
+        'argument' => [
+          'id' => 'component_type',
+          'field_name' => $field_name,
+        ],
+        'sort' => [
+          'id' => 'standard',
+        ],
+      ];
+
+      // Configuration field (for advanced users)
+      $data[$table_name][$field_name . '_configuration'] = [
+        'title' => t('@field Configuration', ['@field' => $field_storage->label()]),
+        'help' => t('The JSON configuration of the component.'),
+        'field' => [
+          'id' => 'standard',
+          'click sortable' => FALSE,
+        ],
+        'filter' => [
+          'id' => 'string',
+        ],
+      ];
+
+      // Component Version field (for cache invalidation)
+      $data[$table_name][$field_name . '_component_version'] = [
+        'title' => t('@field Version', ['@field' => $field_storage->label()]),
+        'help' => t('The version hash of the component.'),
+        'field' => [
+          'id' => 'standard',
+          'click sortable' => TRUE,
+        ],
+        'filter' => [
+          'id' => 'string',
+        ],
+        'sort' => [
+          'id' => 'standard',
+        ],
+      ];
+    }
+    
+  } catch (\Exception $e) {
+    \Drupal::logger('component_views')->error(
+      'Error building Views data: @error',
+      ['@error' => $e->getMessage()]
+    );
+  }
+
+  return $data;
+}
+
+/**
+ * Implements hook_views_data_alter().
+ */
+function component_views_views_data_alter(array &$data) {
+  // Add additional relationships or computed fields if needed
+  try {
+    // Add a computed field for component count per entity
+    foreach ($data as $table_name => &$table_data) {
+      if (strpos($table_name, '__field_component_field') !== FALSE) {
+        $table_data['component_count'] = [
+          'title' => t('Component Count'),
+          'help' => t('The number of components in this field.'),
+          'field' => [
+            'id' => 'numeric',
+            'click sortable' => TRUE,
+          ],
+          'sort' => [
+            'id' => 'standard',
+          ],
+        ];
+      }
+    }
+  } catch (\Exception $e) {
+    \Drupal::logger('component_views')->warning(
+      'Error altering Views data: @error',
+      ['@error' => $e->getMessage()]
+    );
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function component_views_theme($existing, $type, $theme, $path) {
+  return [
+    'component_views_summary' => [
+      'variables' => [
+        'component_type' => NULL,
+        'component_label' => NULL,
+        'summary_data' => [],
+        'delta' => 0,
+        'attributes' => [],
+      ],
+      'template' => 'component-views-summary',
+    ],
+    'component_views_list_item' => [
+      'variables' => [
+        'component_type' => NULL,
+        'component_label' => NULL,
+        'configuration_count' => 0,
+        'delta' => 0,
+        'attributes' => [],
+      ],
+      'template' => 'component-views-list-item',
+    ],
+    'component_views_compact' => [
+      'variables' => [
+        'component_type' => NULL,
+        'component_label' => NULL,
+        'key_info' => '',
+        'delta' => 0,
+        'attributes' => [],
+      ],
+      'template' => 'component-views-compact',
+    ],
+    'component_views_component_list' => [
+      'variables' => [
+        'components' => [],
+        'title' => NULL,
+        'description' => NULL,
+      ],
+      'template' => 'component-views-component-list',
+    ],
+    'component_views_usage_stats' => [
+      'variables' => [
+        'stats' => [],
+        'total_usage' => 0,
+        'total_components' => 0,
+      ],
+      'template' => 'component-views-usage-stats',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_preprocess_views_view().
+ */
+function component_views_preprocess_views_view(&$variables) {
+  $view = $variables['view'];
+  
+  // Add component-specific CSS classes to views that display component fields
+  if (component_views_view_has_component_fields($view)) {
+    if (!isset($variables['attributes']['class'])) {
+      $variables['attributes']['class'] = [];
+    }
+    $variables['attributes']['class'][] = 'view-with-component-fields';
+    
+    // Add library for enhanced component styling
+    $variables['#attached']['library'][] = 'component_views/view';
+    
+    // Add component stats to drupalSettings for JS enhancements
+    try {
+      $helper = \Drupal::service('component_views.helper');
+      $stats = $helper->getComponentUsageStats();
+      $variables['#attached']['drupalSettings']['componentViews']['usageStats'] = $stats;
+    } catch (\Exception $e) {
+      // Silently continue if stats can't be loaded
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_views_view_field().
+ */
+function component_views_preprocess_views_view_field(&$variables) {
+  /** @var \Drupal\views\Plugin\views\field\FieldPluginBase $field */
+  $field = $variables['field'];
+  
+  if ($field->getPluginId() === 'component_field') {
+    $variables['attributes']['class'][] = 'views-field-component-field';
+    
+    // Add component type as CSS class if available
+    $row = $variables['row'];
+    if (isset($row->_entity)) {
+      $entity = $row->_entity;
+      $field_name = $field->definition['field_name'];
+      
+      if ($entity->hasField($field_name)) {
+        $field_items = $entity->get($field_name);
+        if (!$field_items->isEmpty()) {
+          $component_types = [];
+          foreach ($field_items as $item) {
+            $component_type = $item->get('component_type')->getValue();
+            if (!empty($component_type)) {
+              $component_types[] = 'component-type-' . str_replace('_', '-', $component_type);
+            }
+          }
+          if (!empty($component_types)) {
+            $variables['attributes']['class'] = array_merge(
+              $variables['attributes']['class'] ?? [],
+              $component_types
+            );
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for views_ui_config_item_form.
+ */
+function component_views_form_views_ui_config_item_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $form_object = $form_state->getFormObject();
+  
+  if (method_exists($form_object, 'getType') && $form_object->getType() === 'filter') {
+    $item = $form_state->get('handler');
+    
+    if ($item && $item->getPluginId() === 'component_type') {
+      // Add helper text for component type filter
+      $form['options']['helper_text'] = [
+        '#type' => 'details',
+        '#title' => t('Component Filter Help'),
+        '#open' => FALSE,
+        '#weight' => 100,
+        'content' => [
+          '#markup' => '<div class="component-views-filter-help">' .
+            '<p>' . t('This filter allows you to show only content that uses specific component types.') . '</p>' .
+            '<ul>' .
+            '<li>' . t('Select multiple components to show content using any of those components') . '</li>' .
+            '<li>' . t('Use "Is not one of" to exclude specific component types') . '</li>' .
+            '<li>' . t('Leave empty to show all content regardless of components used') . '</li>' .
+            '</ul>' .
+            '</div>',
+        ],
+      ];
+    }
+  }
+}
+
+/**
+ * Implements hook_views_plugins_display_alter().
+ */
+function component_views_views_plugins_display_alter(array &$plugins) {
+  // Add component-optimized display plugin
+  $plugins['component_display'] = [
+    'id' => 'component_display',
+    'module' => 'component_views',
+    'title' => t('Component Display'),
+    'help' => t('Optimized display for component-heavy content.'),
+    'theme' => 'views_view',
+    'class' => 'Drupal\component_views\Plugin\views\display\ComponentDisplay',
+    'parent' => 'default',
+    'uses_menu' => FALSE,
+    'uses_route' => FALSE,
+    'contextual_links_locations' => ['view'],
+    'admin' => t('Component Display'),
+  ];
+}
+
+/**
+ * Check if a view has component fields.
+ */
+function component_views_view_has_component_fields($view) {
+  if (!$view || !method_exists($view, 'getDisplay')) {
+    return FALSE;
+  }
+  
+  try {
+    $display = $view->getDisplay();
+    if (!$display || !method_exists($display, 'getHandlers')) {
+      return FALSE;
+    }
+    
+    $fields = $display->getHandlers('field');
+    
+    foreach ($fields as $field) {
+      if (is_object($field) && method_exists($field, 'getPluginId')) {
+        if ($field->getPluginId() === 'component_field') {
+          return TRUE;
+        }
+      }
+    }
+  } catch (\Exception $e) {
+    // Silently return FALSE if we can't determine
+  }
+  
+  return FALSE;
+}
+
+/**
+ * Implements hook_views_pre_render().
+ */
+function component_views_views_pre_render($view) {
+  // Add performance optimizations for component field views
+  if (component_views_view_has_component_fields($view)) {
+    try {
+      // Pre-load component definitions to avoid multiple discovery calls
+      $discovery = \Drupal::service('component_field.discovery');
+      $components = $discovery->discoverComponents();
+      
+      // Store in view for access by field plugins
+      $view->component_definitions = $components;
+      
+      // Add cache metadata
+      $view->element['#cache']['tags'][] = 'component_field';
+      $view->element['#cache']['contexts'][] = 'component_field.discovery';
+      
+    } catch (\Exception $e) {
+      \Drupal::logger('component_views')->warning(
+        'Error pre-loading components for view: @error',
+        ['@error' => $e->getMessage()]
+      );
+    }
+  }
+}
+
+/**
+ * Implements hook_views_query_alter().
+ */
+function component_views_views_query_alter($view, $query) {
+  // Optimize queries for component fields
+  if (component_views_view_has_component_fields($view)) {
+    try {
+      // Add performance hints or optimizations if needed
+      // This could include adding indexes or query optimizations
+      
+    } catch (\Exception $e) {
+      \Drupal::logger('component_views')->debug(
+        'Error optimizing component views query: @error',
+        ['@error' => $e->getMessage()]
+      );
+    }
+  }
+}
+
+/**
+ * Implements hook_library_info_build().
+ */
+function component_views_library_info_build() {
+  $libraries = [];
+  
+  // Add dynamic component-specific CSS if available
+  try {
+    $discovery = \Drupal::service('component_field.discovery');
+    $components = $discovery->discoverComponents();
+    
+    foreach ($components as $name => $component) {
+      if (!empty($component['css_file']) && file_exists($component['css_file'])) {
+        $css_path = str_replace(DRUPAL_ROOT . '/', '', $component['css_file']);
+        $libraries["component.{$name}"] = [
+          'css' => [
+            'component' => [
+              $css_path => ['weight' => 0],
+            ],
+          ],
+          'dependencies' => [
+            'component_views/base',
+          ],
+        ];
+      }
+    }
+  } catch (\Exception $e) {
+    \Drupal::logger('component_views')->debug(
+      'Error building component libraries: @error',
+      ['@error' => $e->getMessage()]
+    );
+  }
+  
+  return $libraries;
+}
+
+/**
+ * Implements hook_cache_flush().
+ */
+function component_views_cache_flush() {
+  // Clear Views cache when component discovery is refreshed
+  try {
+    if (\Drupal::hasService('views.views_data')) {
+      \Drupal::service('views.views_data')->clear();
+    }
+  } catch (\Exception $e) {
+    // Silently continue - not critical
+  }
+}

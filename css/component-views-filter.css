@@ -1,0 +1,39 @@
+/* Component Views Filter Styles */
+
+.component-views-filter-exposed {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0.5rem;
+}
+
+.component-views-filter-exposed:focus {
+  border-color: #1976d2;
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.1);
+}
+
+.component-views-filter-stats {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.component-views-filter-help {
+  background: #e3f2fd;
+  border: 1px solid #bbdefb;
+  border-radius: 4px;
+  padding: 1rem;
+}
+
+.component-views-filter-help ul {
+  margin: 0.5rem 0 0 1rem;
+}
+
+.component-views-available-list {
+  background: #f8f9fa;
+  border-radius: 4px;
+  padding: 1rem;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 0.875rem;
+}

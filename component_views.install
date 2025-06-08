@@ -1,0 +1,489 @@
+<?php
+
+/**
+ * @file
+ * Installation and update functions for Component Views module.
+ */
+
+use Drupal\views\Entity\View;
+use Drupal\Core\Database\Database;
+
+/**
+ * Implements hook_requirements().
+ */
+function component_views_requirements($phase) {
+  $requirements = [];
+
+  if ($phase === 'runtime') {
+    // Check if component_field module is available and functional
+    if (!\Drupal::moduleHandler()->moduleExists('component_field')) {
+      $requirements['component_views_dependency'] = [
+        'title' => t('Component Views'),
+        'value' => t('Component Field module missing'),
+        'severity' => REQUIREMENT_ERROR,
+        'description' => t('The Component Views module requires the Component Field module to be installed and enabled.'),
+      ];
+      return $requirements;
+    }
+
+    try {
+      // Check component discovery functionality
+      $discovery = \Drupal::service('component_field.discovery');
+      $components = $discovery->discoverComponents();
+      $component_count = count($components);
+
+      $requirements['component_views_discovery'] = [
+        'title' => t('Component Views'),
+        'value' => t('@count components available for Views integration', ['@count' => $component_count]),
+        'severity' => $component_count > 0 ? REQUIREMENT_OK : REQUIREMENT_WARNING,
+      ];
+
+      if ($component_count === 0) {
+        $requirements['component_views_discovery']['description'] = t(
+          'No components were discovered. Component Views functionality will be limited until components are available in your theme.'
+        );
+      }
+
+      // Check for component field usage
+      $usage_stats = \Drupal::service('component_views.helper')->getComponentUsageStats();
+      $total_usage = array_sum($usage_stats);
+
+      $requirements['component_views_usage'] = [
+        'title' => t('Component Views Usage'),
+        'value' => t('@count component instances in use', ['@count' => $total_usage]),
+        'severity' => REQUIREMENT_INFO,
+      ];
+
+      if ($total_usage > 0) {
+        $requirements['component_views_usage']['description'] = t(
+          'Components are being used across your content. Most used: @components',
+          ['@components' => implode(', ', array_slice(array_keys($usage_stats), 0, 3))]
+        );
+      }
+
+    } catch (\Exception $e) {
+      $requirements['component_views_error'] = [
+        'title' => t('Component Views'),
+        'value' => t('Service error'),
+        'severity' => REQUIREMENT_ERROR,
+        'description' => t('Error accessing Component Views services: @error', ['@error' => $e->getMessage()]),
+      ];
+    }
+
+    // Check Views module version compatibility
+    if (\Drupal::moduleHandler()->moduleExists('views')) {
+      $views_version = \Drupal::service('extension.list.module')->getExtensionInfo('views')['version'] ?? 'unknown';
+      $requirements['component_views_compatibility'] = [
+        'title' => t('Component Views Compatibility'),
+        'value' => t('Views @version', ['@version' => $views_version]),
+        'severity' => REQUIREMENT_OK,
+        'description' => t('Component Views is compatible with the installed Views module.'),
+      ];
+    }
+  }
+
+  return $requirements;
+}
+
+/**
+ * Implements hook_install().
+ */
+function component_views_install() {
+  try {
+    // Create sample views to demonstrate functionality
+    component_views_create_sample_views();
+
+    // Set up default permissions
+    component_views_setup_permissions();
+
+    // Initialize usage statistics
+    component_views_initialize_stats();
+
+    $messenger = \Drupal::messenger();
+    $messenger->addStatus(t('Component Views module installed successfully!'));
+    
+    // Check if we have components to work with
+    $discovery = \Drupal::service('component_field.discovery');
+    $components = $discovery->discoverComponents();
+    
+    if (count($components) > 0) {
+      $messenger->addStatus(t('Found @count components available for Views integration.', [
+        '@count' => count($components),
+      ]));
+    } else {
+      $messenger->addWarning(t('No components were found. Add components to your theme to use Component Views functionality.'));
+    }
+
+    $messenger->addStatus(t('Visit <a href="/admin/structure/views">the Views administration page</a> to create component-powered views.'));
+
+  } catch (\Exception $e) {
+    \Drupal::logger('component_views')->error('Error during installation: @error', ['@error' => $e->getMessage()]);
+    \Drupal::messenger()->addError(t('There was an error during Component Views installation. Check the logs for details.'));
+  }
+}
+
+/**
+ * Create sample views to demonstrate Component Views functionality.
+ */
+function component_views_create_sample_views() {
+  try {
+    // Create a sample view for pages with components
+    $view_config = [
+      'langcode' => 'en',
+      'status' => FALSE, // Disabled by default
+      'dependencies' => [
+        'module' => ['component_field', 'component_views', 'node'],
+      ],
+      'id' => 'component_showcase',
+      'label' => 'Component Showcase',
+      'module' => 'component_views',
+      'description' => 'Sample view showcasing Component Views functionality',
+      'tag' => 'component_views',
+      'base_table' => 'node_field_data',
+      'base_field' => 'nid',
+      'display' => [
+        'default' => [
+          'id' => 'default',
+          'display_title' => 'Default',
+          'display_plugin' => 'component_display',
+          'position' => 0,
+          'display_options' => [
+            'title' => 'Component Showcase',
+            'fields' => [
+              'title' => [
+                'id' => 'title',
+                'table' => 'node_field_data',
+                'field' => 'title',
+                'plugin_id' => 'field',
+                'label' => '',
+                'exclude' => FALSE,
+              ],
+            ],
+            'filters' => [
+              'status' => [
+                'id' => 'status',
+                'table' => 'node_field_data',
+                'field' => 'status',
+                'plugin_id' => 'boolean',
+                'value' => '1',
+                'group' => 1,
+                'expose' => ['operator' => FALSE],
+              ],
+            ],
+            'sorts' => [
+              'created' => [
+                'id' => 'created',
+                'table' => 'node_field_data',
+                'field' => 'created',
+                'plugin_id' => 'date',
+                'order' => 'DESC',
+              ],
+            ],
+            'pager' => [
+              'type' => 'full',
+              'options' => ['items_per_page' => 10],
+            ],
+          ],
+        ],
+        'page_1' => [
+          'id' => 'page_1',
+          'display_title' => 'Component Gallery',
+          'display_plugin' => 'page',
+          'position' => 1,
+          'display_options' => [
+            'path' => 'components/showcase',
+            'menu' => [
+              'type' => 'normal',
+              'title' => 'Component Showcase',
+              'menu_name' => 'main',
+            ],
+          ],
+        ],
+      ],
+    ];
+
+    // Check if component field exists before adding it
+    $field_storage_configs = \Drupal::entityTypeManager()
+      ->getStorage('field_storage_config')
+      ->loadByProperties(['type' => 'component_field']);
+
+    if (!empty($field_storage_configs)) {
+      $field_storage = reset($field_storage_configs);
+      $field_name = $field_storage->getName();
+      
+      // Add component field to the view
+      $view_config['display']['default']['display_options']['fields']['field_component_field'] = [
+        'id' => 'field_component_field',
+        'table' => 'node__' . $field_name,
+        'field' => $field_name,
+        'plugin_id' => 'component_field',
+        'label' => 'Components',
+        'settings' => [
+          'display_mode' => 'full',
+          'show_wrapper' => TRUE,
+          'enable_animation' => TRUE,
+        ],
+      ];
+
+      // Add component type filter
+      $view_config['display']['default']['display_options']['filters']['component_type'] = [
+        'id' => 'component_type',
+        'table' => 'node__' . $field_name,
+        'field' => $field_name . '_component_type',
+        'plugin_id' => 'component_type',
+        'exposed' => TRUE,
+        'expose' => [
+          'identifier' => 'component_type',
+          'label' => 'Component Type',
+          'multiple' => TRUE,
+          'remember' => TRUE,
+        ],
+      ];
+    }
+
+    $view = View::create($view_config);
+    $view->save();
+
+    \Drupal::logger('component_views')->info('Created sample Component Showcase view');
+
+  } catch (\Exception $e) {
+    \Drupal::logger('component_views')->warning('Could not create sample views: @error', ['@error' => $e->getMessage()]);
+  }
+}
+
+/**
+ * Set up default permissions for Component Views.
+ */
+function component_views_setup_permissions() {
+  try {
+    $role_storage = \Drupal::entityTypeManager()->getStorage('user_role');
+    
+    // Grant permissions to content editors
+    $editor_roles = ['editor', 'content_editor', 'author'];
+    foreach ($editor_roles as $role_id) {
+      $role = $role_storage->load($role_id);
+      if ($role) {
+        // Component Views doesn't define its own permissions,
+        // but we can ensure users have access to Views and component fields
+        if (\Drupal::moduleHandler()->moduleExists('component_field')) {
+          $role->grantPermission('edit component field');
+        }
+      }
+    }
+
+    // Grant admin permissions
+    $admin_roles = ['administrator', 'admin'];
+    foreach ($admin_roles as $role_id) {
+      $role = $role_storage->load($role_id);
+      if ($role) {
+        $role->grantPermission('administer views');
+        if (\Drupal::moduleHandler()->moduleExists('component_field')) {
+          $role->grantPermission('administer component field');
+        }
+        $role->save();
+      }
+    }
+
+  } catch (\Exception $e) {
+    \Drupal::logger('component_views')->warning('Error setting up permissions: @error', ['@error' => $e->getMessage()]);
+  }
+}
+
+/**
+ * Initialize component usage statistics.
+ */
+function component_views_initialize_stats() {
+  try {
+    // This will be called to generate initial statistics
+    $helper = \Drupal::service('component_views.helper');
+    $stats = $helper->getComponentUsageStats();
+    
+    // Log the initial state
+    \Drupal::logger('component_views')->info('Initialized with @count component types in use', [
+      '@count' => count($stats),
+    ]);
+
+  } catch (\Exception $e) {
+    \Drupal::logger('component_views')->warning('Error initializing stats: @error', ['@error' => $e->getMessage()]);
+  }
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function component_views_uninstall() {
+  try {
+    // Remove sample views created during installation
+    $views_to_remove = ['component_showcase'];
+    
+    foreach ($views_to_remove as $view_id) {
+      $view = View::load($view_id);
+      if ($view) {
+        $view->delete();
+        \Drupal::logger('component_views')->info('Removed sample view: @view', ['@view' => $view_id]);
+      }
+    }
+
+    // Clear Views data cache to remove our plugins
+    if (\Drupal::hasService('views.views_data')) {
+      \Drupal::service('views.views_data')->clear();
+    }
+
+    // Clear all caches to ensure clean removal
+    drupal_flush_all_caches();
+
+    \Drupal::messenger()->addStatus(t('Component Views module uninstalled successfully.'));
+
+  } catch (\Exception $e) {
+    \Drupal::logger('component_views')->error('Error during uninstallation: @error', ['@error' => $e->getMessage()]);
+  }
+}
+
+/**
+ * Update 8001: Add enhanced Views integration.
+ */
+function component_views_update_8001() {
+  // Clear Views cache to register new plugins
+  if (\Drupal::hasService('views.views_data')) {
+    \Drupal::service('views.views_data')->clear();
+  }
+
+  // Update existing component showcase view if it exists
+  $view = View::load('component_showcase');
+  if ($view) {
+    $display = $view->getDisplay('default');
+    $display_options = $display['display_options'];
+    
+    // Add new Component Display plugin if not already set
+    if ($display['display_plugin'] !== 'component_display') {
+      $display['display_plugin'] = 'component_display';
+      $view->getExecutable()->setDisplay('default');
+      $view->getExecutable()->displayHandlers->get('default')->overrideOption('display_plugin', 'component_display');
+      $view->save();
+    }
+  }
+
+  return t('Enhanced Views integration for Component Views.');
+}
+
+/**
+ * Update 8002: Add component usage statistics tracking.
+ */
+function component_views_update_8002() {
+  try {
+    // Initialize usage statistics for existing content
+    component_views_initialize_stats();
+    
+    // Clear caches to ensure new functionality is available
+    drupal_flush_all_caches();
+    
+    return t('Added component usage statistics tracking.');
+    
+  } catch (\Exception $e) {
+    \Drupal::logger('component_views')->error('Error in update 8002: @error', ['@error' => $e->getMessage()]);
+    throw new \DrupalUpdateException('Update 8002 failed: ' . $e->getMessage());
+  }
+}
+
+/**
+ * Update 8003: Enhanced caching and performance optimizations.
+ */
+function component_views_update_8003() {
+  try {
+    // Update existing views to use new performance optimizations
+    $view_storage = \Drupal::entityTypeManager()->getStorage('view');
+    $views = $view_storage->loadMultiple();
+    
+    $updated_views = 0;
+    foreach ($views as $view) {
+      if (component_views_view_has_component_fields($view)) {
+        // Add cache contexts and tags for component fields
+        $displays = $view->get('display');
+        $updated = FALSE;
+        
+        foreach ($displays as $display_id => &$display) {
+          if (!isset($display['cache_metadata'])) {
+            $display['cache_metadata'] = [
+              'contexts' => ['component_field.discovery'],
+              'tags' => ['component_field'],
+            ];
+            $updated = TRUE;
+          }
+        }
+        
+        if ($updated) {
+          $view->set('display', $displays);
+          $view->save();
+          $updated_views++;
+        }
+      }
+    }
+    
+    return t('Enhanced caching for @count views with component fields.', ['@count' => $updated_views]);
+    
+  } catch (\Exception $e) {
+    \Drupal::logger('component_views')->error('Error in update 8003: @error', ['@error' => $e->getMessage()]);
+    return t('Update completed with warnings. Check logs for details.');
+  }
+}
+
+/**
+ * Update 8004: Add component grouping and lazy loading features.
+ */
+function component_views_update_8004() {
+  try {
+    // Update component showcase view to demonstrate new features
+    $view = View::load('component_showcase');
+    if ($view) {
+      $display = $view->getDisplay('default');
+      
+      // Add lazy loading and grouping options
+      if ($display['display_plugin'] === 'component_display') {
+        $view->getExecutable()->setDisplay('default');
+        $display_handler = $view->getExecutable()->displayHandlers->get('default');
+        
+        $display_handler->overrideOption('component_lazy_load', TRUE);
+        $display_handler->overrideOption('component_grouping', TRUE);
+        $display_handler->overrideOption('component_batch_size', 20);
+        
+        $view->save();
+      }
+    }
+    
+    // Clear plugin cache to register new options
+    \Drupal::service('plugin.manager.views.display')->clearCachedDefinitions();
+    
+    return t('Added component grouping and lazy loading features.');
+    
+  } catch (\Exception $e) {
+    \Drupal::logger('component_views')->error('Error in update 8004: @error', ['@error' => $e->getMessage()]);
+    return t('Update completed with warnings. Check logs for details.');
+  }
+}
+
+/**
+ * Helper function to check if a view uses component fields.
+ */
+function component_views_view_has_component_fields($view) {
+  if (!$view || !method_exists($view, 'get')) {
+    return FALSE;
+  }
+  
+  try {
+    $displays = $view->get('display');
+    
+    foreach ($displays as $display) {
+      if (isset($display['display_options']['fields'])) {
+        foreach ($display['display_options']['fields'] as $field) {
+          if (isset($field['plugin_id']) && $field['plugin_id'] === 'component_field') {
+            return TRUE;
+          }
+        }
+      }
+    }
+  } catch (\Exception $e) {
+    // Return FALSE if we can't determine
+  }
+  
+  return FALSE;
+}

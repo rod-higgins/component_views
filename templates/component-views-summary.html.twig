@@ -1,0 +1,49 @@
+{#
+/**
+ * @file
+ * Template for component field summary display in Views.
+ *
+ * Available variables:
+ * - component_type: The component type machine name
+ * - component_label: Human-readable component label
+ * - summary_data: Array of key summary information
+ * - delta: Item position
+ * - attributes: HTML attributes for the wrapper
+ */
+#}
+
+<div{{ attributes.addClass('component-views-summary') }}>
+  <div class="component-summary-header">
+    <h6 class="component-summary-title">
+      <span class="component-icon">📦</span>
+      {{ component_label }}
+    </h6>
+    <span class="component-type-badge">{{ component_type }}</span>
+  </div>
+  
+  {% if summary_data %}
+    <div class="component-summary-content">
+      {% for key, value in summary_data %}
+        <div class="component-summary-item component-summary-{{ key }}">
+          {% if key == 'primary' %}
+            <strong>{{ value }}</strong>
+          {% elseif key == 'secondary' %}
+            <span class="text-muted">{{ value }}</span>
+          {% elseif key == 'tertiary' %}
+            <small>{{ value }}</small>
+          {% elseif key == 'status' %}
+            <span class="component-status component-status-{{ value }}">{{ value|title }}</span>
+          {% else %}
+            <span class="component-prop">
+              <em>{{ key|title }}:</em> {{ value }}
+            </span>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+  
+  <div class="component-summary-meta">
+    <small class="component-delta">Item {{ delta + 1 }}</small>
+  </div>
+</div>

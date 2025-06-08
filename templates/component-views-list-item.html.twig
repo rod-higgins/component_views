@@ -1,0 +1,36 @@
+{#
+/**
+ * @file
+ * Template for component field list item display in Views.
+ *
+ * Available variables:
+ * - component_type: The component type machine name
+ * - component_label: Human-readable component label
+ * - configuration_count: Number of configured properties
+ * - delta: Item position
+ * - attributes: HTML attributes for the wrapper
+ */
+#}
+
+<div{{ attributes.addClass('component-views-list-item') }}>
+  <div class="component-list-icon">
+    <span class="component-icon">🧩</span>
+  </div>
+  
+  <div class="component-list-content">
+    <div class="component-list-title">{{ component_label }}</div>
+    <div class="component-list-meta">
+      <span class="component-list-type">{{ component_type }}</span>
+      {% if configuration_count > 0 %}
+        <span class="component-list-separator">•</span>
+        <span class="component-list-props">
+          {{ configuration_count }} {{ configuration_count == 1 ? 'property' : 'properties' }}
+        </span>
+      {% endif %}
+    </div>
+  </div>
+  
+  <div class="component-list-badge">
+    <span class="component-delta-badge">{{ delta + 1 }}</span>
+  </div>
+</div>

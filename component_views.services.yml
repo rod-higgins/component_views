@@ -1,0 +1,10 @@
+name: 'Component Views'
+type: module
+description: 'Views integration for Component Field - filtering, rendering, and display plugins for SDC components'
+package: 'MUI Base'
+version: '1.0.0'
+core_version_requirement: ^10.4 || ^11
+weight: 101
+dependencies:
+  - drupal:views
+  - component_field:component_field

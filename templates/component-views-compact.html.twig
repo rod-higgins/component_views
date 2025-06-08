@@ -1,0 +1,22 @@
+{#
+/**
+ * @file
+ * Template for component field compact display in Views.
+ *
+ * Available variables:
+ * - component_type: The component type machine name
+ * - component_label: Human-readable component label
+ * - key_info: Key information string
+ * - delta: Item position
+ * - attributes: HTML attributes for the wrapper
+ */
+#}
+
+<div{{ attributes.addClass('component-views-compact') }}>
+  <span class="component-compact-icon">⚡</span>
+  <span class="component-compact-label">{{ component_label }}</span>
+  {% if key_info %}
+    <span class="component-compact-separator">:</span>
+    <span class="component-compact-info">{{ key_info }}</span>
+  {% endif %}
+</div>

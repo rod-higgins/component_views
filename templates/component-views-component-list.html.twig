@@ -1,0 +1,84 @@
+{#
+/**
+ * @file
+ * Template for displaying list of available components.
+ *
+ * Available variables:
+ * - components: Array of available components
+ * - title: Page/section title
+ * - description: Description text
+ */
+#}
+
+<div class="component-views-component-list">
+  {% if title %}
+    <h2 class="component-list-title">{{ title }}</h2>
+  {% endif %}
+  
+  {% if description %}
+    <div class="component-list-description">
+      {{ description }}
+    </div>
+  {% endif %}
+  
+  {% if components %}
+    <div class="component-list-grid">
+      {% for name, component in components %}
+        <div class="component-list-card">
+          <div class="component-card-header">
+            <h4 class="component-card-title">
+              <span class="component-icon">🧩</span>
+              {{ component.label|default(name) }}
+            </h4>
+            <span class="component-card-type">{{ name }}</span>
+          </div>
+          
+          {% if component.description %}
+            <div class="component-card-description">
+              {{ component.description }}
+            </div>
+          {% endif %}
+          
+          <div class="component-card-meta">
+            {% set props_count = component.props ? component.props|length : 0 %}
+            <span class="component-props-count">
+              {{ props_count }} {{ props_count == 1 ? 'property' : 'properties' }}
+            </span>
+            
+            {% if component.relative_path %}
+              <span class="component-card-separator">•</span>
+              <span class="component-source">
+                <code>{{ component.relative_path }}</code>
+              </span>
+            {% endif %}
+          </div>
+          
+          {% if component.props and component.props|length > 0 %}
+            <details class="component-card-props">
+              <summary>View Properties</summary>
+              <ul class="component-props-list">
+                {% for prop_name, prop_info in component.props %}
+                  <li class="component-prop-item">
+                    <code>{{ prop_name }}</code>
+                    {% if prop_info.type %}
+                      <span class="prop-type">({{ prop_info.type }})</span>
+                    {% endif %}
+                    {% if prop_info.description %}
+                      <span class="prop-description">- {{ prop_info.description }}</span>
+                    {% endif %}
+                  </li>
+                {% endfor %}
+              </ul>
+            </details>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="component-list-empty">
+      <div class="empty-icon">🎨</div>
+      <p>No components are currently available.</p>
+      <p><small>Components are automatically discovered from your theme's <code>components/</code> directory.</small></p>
+    </div>
+  {% endif %}
+</div>
