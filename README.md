@@ -2,294 +2,194 @@
 
 ## Overview
 
-The Component Views module provides comprehensive Views integration for the Component Field module, enabling powerful filtering, display, and management of Single Directory Components (SDC) through Drupal's Views system.
+The **Component Views** module provides comprehensive Views integration for the Component Field module, enabling powerful filtering, display, and management of Single Directory Components (SDC) through Drupal's Views system. This module transforms how you work with components in content by providing advanced visualization, filtering, and analysis capabilities.
 
 ## Features
 
 ### 🎯 **Advanced Views Integration**
-- Dedicated field plugin for component rendering with multiple display modes
-- Component type filter with search and statistics
-- Component type argument for URL-based filtering
-- Optimized display plugin for component-heavy views
+- **Dedicated Field Plugin**: Component rendering with multiple display modes optimized for Views
+- **Component Type Filter**: Advanced filtering with search functionality and usage statistics
+- **Component Type Argument**: URL-based filtering for dynamic component galleries
+- **Optimized Display Plugin**: Performance-optimized rendering for component-heavy views
+- **Smart Caching**: Intelligent cache strategies with component definition preloading
 
 ### 📊 **Multiple Display Modes**
-- **Full**: Complete component rendering with all properties
-- **Summary**: Key information with metadata display  
-- **List**: Component name and property count
-- **Compact**: Minimal inline display
+- **Full**: Complete component rendering with all properties and configuration
+- **Summary**: Key information display with metadata and usage statistics
+- **List**: Minimal display showing component name and property count
+- **Compact**: Ultra-condensed inline display for space-constrained layouts
 
-### 🔍 **Powerful Filtering**
-- Filter by component type with multi-select support
-- Search within component filter options
-- Component usage statistics in filter interface
-- Case-sensitive and case-insensitive matching
+### 🔍 **Powerful Filtering & Search**
+- **Multi-Select Component Filter**: Filter by multiple component types simultaneously
+- **Search Within Components**: Live search functionality within component filter options
+- **Usage Statistics Integration**: See component popularity and usage data in filter interface
+- **Case-Sensitive/Insensitive**: Flexible matching options for component discovery
+- **Exposed Filters**: Allow site visitors to filter component galleries
 
 ### ⚡ **Performance Optimizations**
-- Component definition preloading
-- Intelligent caching strategies
-- Lazy loading for large component lists
-- Batch processing for better performance
+- **Component Definition Preloading**: Reduces discovery overhead in Views
+- **Intelligent Caching**: Leverages component_field.discovery cache system
+- **Lazy Loading**: Deferred loading for large component lists
+- **Batch Processing**: Handles large datasets efficiently
+- **Query Optimization**: Optimized database queries for component filtering
 
-### 🎨 **Enhanced UX**
-- Live preview while configuring
-- Animation support
-- Responsive design
-- Component usage analytics
+### 🎨 **Enhanced User Experience**
+- **Live Preview**: Component preview while configuring Views
+- **Animation Support**: Smooth transitions and visual feedback
+- **Responsive Design**: Mobile-friendly component displays
+- **Component Analytics**: Usage tracking and popularity metrics
+- **Admin Interface**: Dedicated management pages for component views
 
-## Installation
+## Installation & Setup
 
-1. **Prerequisites**: Ensure the Component Field module is installed and enabled
-   ```bash
-   drush en component_field
-   ```
+### Prerequisites
+The Component Views module requires the **Component Field** module to be installed and functional.
 
-2. **Install Component Views**:
-   ```bash
-   drush en component_views
-   ```
+```bash
+# Install Component Field first
+drush en component_field
 
-3. **Clear caches**:
-   ```bash
-   drush cr
-   ```
+# Install Component Views
+drush en component_views
 
-## Quick Start
-
-### Creating a Component Gallery View
-
-1. **Create a new View**:
-   - Go to `/admin/structure/views/add`
-   - Choose "Content" as the base table
-   - Name it "Component Gallery"
-
-2. **Add Component Field**:
-   - Add your component field to the view
-   - Configure display mode (Full, Summary, List, or Compact)
-   - Enable animations and responsive features
-
-3. **Add Component Filter**:
-   - Add a filter for "Component Type"
-   - Expose it to visitors
-   - Enable multiple selection
-
-4. **Configure Display**:
-   - Use "Component Display" for optimal performance
-   - Enable component grouping and lazy loading
-   - Set appropriate cache strategy
-
-## Field Plugin Configuration
-
-The Component Field plugin offers extensive configuration options:
-
-### Display Modes
-
-```yaml
-Full Mode:
-  - Complete component rendering
-  - All properties and styling
-  - Best for detailed display
-
-Summary Mode:
-  - Key information extraction
-  - Metadata display
-  - Compact but informative
-
-List Mode:
-  - Component name and type
-  - Property count
-  - Minimal overhead
-
-Compact Mode:
-  - Inline display
-  - Essential info only
-  - Space-efficient
+# Clear all caches
+drush cr
 ```
 
-### Field Settings
+### Verification
+After installation, verify functionality:
 
+1. **Check Requirements**: Visit `/admin/reports/status` to ensure all requirements are met
+2. **View Components**: Go to `/admin/structure/component-field` to see discovered components
+3. **Create Views**: Navigate to `/admin/structure/views/add` to start creating component views
+
+## Quick Start Guide
+
+### Creating a Component Gallery
+
+1. **Create New View**:
+   ```
+   URL: /admin/structure/views/add
+   Name: Component Gallery
+   Base Table: Content (node)
+   ```
+
+2. **Add Component Field**:
+   - Click "Add Field"
+   - Select your component field (e.g., "field_component_field")
+   - Choose display mode: Full, Summary, List, or Compact
+   - Configure responsiveness and animation options
+
+3. **Add Component Type Filter**:
+   - Click "Add Filter Criteria"
+   - Select "Component Type"
+   - Choose expose options for visitor filtering
+   - Enable multiple selection if desired
+
+4. **Configure Display**:
+   - Add page display with path like `/components/gallery`
+   - Set up menu integration
+   - Configure caching for optimal performance
+
+### Component Showcase View
+
+Create a comprehensive component showcase:
+
+```yaml
+# Example View Configuration
+displays:
+  page_1:
+    display_plugin: page
+    display_title: Component Showcase
+    display_options:
+      path: components/showcase
+      menu:
+        type: normal
+        title: Component Gallery
+        menu_name: main
+      filters:
+        component_type:
+          exposed: true
+          multiple: true
+          search: true
+      fields:
+        field_component_field:
+          type: component_field
+          display_mode: summary
+          enable_animations: true
+          responsive: true
+```
+
+## Configuration Guide
+
+### Field Display Settings
+
+#### Full Display Mode
+- Complete component rendering with all properties
+- Shows component configuration and metadata
+- Best for detailed component documentation
+- Higher performance cost but maximum information
+
+#### Summary Display Mode
+- Displays key component information
+- Shows primary properties and usage statistics
+- Balanced between detail and performance
+- Ideal for component catalogs
+
+#### List Display Mode
+- Minimal component information
+- Component name and property count only
+- Fastest rendering mode
+- Perfect for administrative overviews
+
+#### Compact Display Mode
+- Ultra-minimal inline display
+- Component type and key identifier only
+- Lowest resource usage
+- Suitable for embedded component lists
+
+### Filter Configuration
+
+#### Component Type Filter
 ```php
-// Example field configuration
-$field_config = [
-  'display_mode' => 'summary',        // full|summary|list|compact
-  'component_filter' => '',           // Filter specific components
-  'limit_components' => 10,           // Limit number shown
-  'show_wrapper' => TRUE,             // Include wrapper elements
-  'enable_animation' => TRUE,         // Add animations
-  'component_classes' => 'my-class',  // Custom CSS classes
+// Advanced filter configuration
+$filter_options = [
+  'expose' => TRUE,
+  'multiple' => TRUE,
+  'search_enabled' => TRUE,
+  'show_statistics' => TRUE,
+  'case_sensitive' => FALSE,
+  'include_unused' => FALSE,
 ];
 ```
 
-## Filter Plugin Usage
+#### Usage Statistics
+The filter automatically displays:
+- Component popularity ranking
+- Usage count per component type
+- Most/least used components
+- Component availability status
 
-### Basic Component Type Filter
+### Performance Tuning
 
+#### Cache Configuration
 ```php
-// In Views UI, add filter:
-// Component Type (component_type)
-// - Expose filter: Yes
-// - Allow multiple selections: Yes
-// - Remember last selection: Yes
+// Enable aggressive caching for component views
+$view->element['#cache'] = [
+  'tags' => ['component_field', 'component_field.discovery'],
+  'contexts' => ['user.permissions', 'url.query_args'],
+  'max-age' => 3600, // 1 hour cache
+];
 ```
 
-### Advanced Filter Configuration
-
-```yaml
-Filter Options:
-  - Grouped by component category
-  - Usage statistics display
-  - Search within options
-  - Validation and error handling
-```
-
-### Programmatic Filter Usage
-
+#### Preloading Components
 ```php
-// Get components by type
-$view = Views::getView('my_component_view');
-$view->setArguments(['button']); // Filter to button components
-$view->execute();
+// Components are automatically preloaded for views
+// Access preloaded components in templates:
+$components = $view->component_definitions ?? [];
 ```
 
-## Argument Plugin for URLs
-
-Create URLs like `/components/button` or `/gallery/card`:
-
-```php
-// Configure argument in Views:
-// - Add Component Type argument
-// - Enable case transformation
-// - Set validation options
-// - Configure fallback behavior
-```
-
-### URL Examples
-
-```
-/components/button      → Show only button components
-/gallery/card           → Show only card components  
-/showcase/test          → Show only test components
-/components/non-exist   → Show fallback or 404
-```
-
-## Display Plugin Features
-
-The Component Display plugin provides optimized rendering:
-
-### Performance Settings
-
-```yaml
-Optimization Options:
-  component_optimization: true     # Enable optimizations
-  component_preload: true         # Preload definitions
-  component_lazy_load: false      # Lazy loading
-  component_cache_strategy: 'aggressive'
-  component_batch_size: 20        # Items per batch
-  component_grouping: false       # Group similar components
-  component_animation: true       # Enable animations
-  component_responsive: true      # Responsive features
-```
-
-### Cache Strategies
-
-```php
-// Cache strategies available:
-'none'        => No component caching
-'basic'       => Cache definitions only  
-'aggressive'  => Cache definitions and output
-'intelligent' => Adaptive based on complexity
-```
-
-## Templates and Theming
-
-### Available Templates
-
-```twig
-{# Summary display #}
-templates/component-views-summary.html.twig
-
-{# List item display #}
-templates/component-views-list-item.html.twig
-
-{# Compact display #}
-templates/component-views-compact.html.twig
-
-{# Component listing page #}
-templates/component-views-component-list.html.twig
-
-{# Usage statistics #}
-templates/component-views-usage-stats.html.twig
-```
-
-### Template Variables
-
-```twig
-{# Summary template variables #}
-- component_type: Machine name
-- component_label: Human label  
-- summary_data: Key information array
-- delta: Item position
-- attributes: HTML attributes
-
-{# List template variables #}
-- component_type: Machine name
-- component_label: Human label
-- configuration_count: Number of props
-- delta: Item position  
-- attributes: HTML attributes
-```
-
-### CSS Classes
-
-```css
-/* Field wrapper classes */
-.component-views-field
-.component-views-mode-{mode}
-.component-views-count-{number}
-
-/* Item classes */
-.component-views-item
-.component-views-{component-type}
-.component-views-delta-{number}
-.component-views-animated
-
-/* Display mode classes */
-.component-views-summary
-.component-views-list-item
-.component-views-compact
-```
-
-## JavaScript Enhancement
-
-### Available Behaviors
-
-```javascript
-// Field enhancements
-Drupal.behaviors.componentViewsField
-
-// View-level enhancements  
-Drupal.behaviors.componentViewsView
-
-// Filter enhancements
-Drupal.behaviors.componentViewsFilter
-
-// Admin interface enhancements
-Drupal.behaviors.componentViewsAdmin
-```
-
-### Custom JavaScript
-
-```javascript
-// Access component data
-const components = drupalSettings.componentViews.components;
-const usageStats = drupalSettings.componentViews.usageStats;
-
-// Listen for component events
-$(document).on('componentField:component:rendered', function(e, data) {
-  console.log('Component rendered:', data.type, data.config);
-});
-```
-
-## Service Usage
+## API Reference
 
 ### Component Views Helper Service
 
@@ -297,291 +197,256 @@ $(document).on('componentField:component:rendered', function(e, data) {
 // Get the helper service
 $helper = \Drupal::service('component_views.helper');
 
-// Get component options for forms
-$options = $helper->getComponentOptions(TRUE, TRUE);
+// Get component options for Views forms
+$options = $helper->getComponentOptions($include_stats = TRUE, $include_descriptions = TRUE);
 
-// Get usage statistics
+// Get usage statistics across the site
 $stats = $helper->getComponentUsageStats();
+// Returns: ['button' => 45, 'card' => 23, 'modal' => 12]
 
-// Get entities using a component
-$entities = $helper->getEntitiesUsingComponent('button', 'node', 50);
+// Find entities using specific components
+$entities = $helper->getEntitiesUsingComponent('button', $entity_type = 'node', $limit = 50);
 
-// Check if component exists
-$exists = $helper->componentExists('my_component');
+// Check component availability
+$exists = $helper->componentExists('my_custom_component');
 
-// Get popular components
-$popular = $helper->getPopularComponents(10);
+// Get most popular components
+$popular = $helper->getPopularComponents($limit = 10);
 
-// Get unused components
+// Find unused components
 $unused = $helper->getUnusedComponents();
 ```
 
 ### Component Summary Extraction
 
 ```php
-// Extract summary for display
+// Extract component summary for display
 $summary = $helper->extractComponentSummary(
-  'button',
-  ['label' => 'Click me', 'variant' => 'primary'],
-  50 // max length
+  $component_type = 'button',
+  $configuration = ['label' => 'Click me', 'variant' => 'primary'],
+  $max_length = 50
 );
 
-// Returns:
+// Returns structured summary data:
 // [
 //   'primary' => 'Click me',
-//   'secondary' => 'primary'
+//   'secondary' => 'primary',
+//   'metadata' => ['variant' => 'primary']
 // ]
 ```
 
-## Hooks and Integration
+## Integration with Component Field
 
-### Theme Hooks
+### Auto-Discovery Integration
 
-```php
-/**
- * Implements hook_theme().
- */
-function mymodule_theme($existing, $type, $theme, $path) {
-  return [
-    'component_views_custom_summary' => [
-      'variables' => [
-        'component_type' => NULL,
-        'summary_data' => [],
-      ],
-    ],
-  ];
-}
-```
-
-### Views Hooks
+Component Views leverages the Component Field module's auto-discovery system:
 
 ```php
-/**
- * Implements hook_views_data_alter().
- */
-function mymodule_views_data_alter(array &$data) {
-  // Add custom component field handlers
-  $data['node__field_components']['custom_component_field'] = [
-    'title' => t('Custom Component Renderer'),
-    'field' => [
-      'id' => 'custom_component_field',
-    ],
-  ];
-}
+// Component discovery is handled automatically
+$discovery = \Drupal::service('component_field.discovery');
+$components = $discovery->discoverComponents();
+
+// Views automatically refreshes when components change
+// Manual refresh available at: /admin/structure/component-field
 ```
 
-### Form Alterations
+### Component Requirements for Views
 
-```php
-/**
- * Implements hook_form_alter().
- */
-function mymodule_form_alter(&$form, FormStateInterface $form_state, $form_id) {
-  // Enhance component filter forms
-  if ($form_id === 'views_exposed_form') {
-    if (isset($form['component_type'])) {
-      $form['component_type']['#description'] = t('Custom help text');
-    }
-  }
-}
+Components discovered by Component Field are automatically available in Views if they:
+
+1. **Follow SDC Standards**: Proper Single Directory Component structure
+2. **Have Valid Props**: Properly defined component properties
+3. **Are Cached**: Successfully processed by component discovery
+4. **Have Permissions**: User has access to view the components
+
+### Supported Component Sources
+
+- **Theme Components**: Components in active theme directories
+- **MUI Components**: Material UI components with proper imports
+- **Custom Components**: User-defined components following SDC patterns
+- **Third-Party Components**: Components from contributed themes
+
+## Theming & Customization
+
+### Theme Templates
+
+#### Component Views Field Template
+```twig
+{# templates/component-views-field.html.twig #}
+<div class="component-views-field component-views-mode-{{ display_mode }}">
+  {% for delta, component in components %}
+    <div class="component-views-item component-views-{{ component.type }} component-views-delta-{{ delta }}">
+      {% if display_mode == 'full' %}
+        {{ component.rendered }}
+        <div class="component-metadata">
+          <span class="component-type">{{ component.type }}</span>
+          <span class="component-props-count">{{ component.props_count }} props</span>
+        </div>
+      {% elseif display_mode == 'summary' %}
+        <h4>{{ component.label }}</h4>
+        <p>{{ component.summary.primary }}</p>
+        <small>{{ component.summary.secondary }}</small>
+      {% elseif display_mode == 'list' %}
+        <span class="component-name">{{ component.type }}</span>
+        <span class="component-count">({{ component.props_count }})</span>
+      {% else %}
+        <code>{{ component.type }}</code>
+      {% endif %}
+    </div>
+  {% endfor %}
+</div>
 ```
 
-## Advanced Usage Examples
-
-### Custom Field Formatter
-
-```php
-/**
- * Custom component field formatter.
- */
-class CustomComponentFormatter extends ComponentFieldFormatter {
-  
-  public function viewElements(FieldItemListInterface $items, $langcode) {
-    $elements = parent::viewElements($items, $langcode);
-    
-    // Add custom processing
-    foreach ($elements as $delta => &$element) {
-      $element['#attributes']['class'][] = 'custom-component';
-    }
-    
-    return $elements;
-  }
-}
+#### Component Summary Template
+```twig
+{# templates/component-views-summary.html.twig #}
+<div class="component-summary" data-component-type="{{ component_type }}">
+  <div class="component-summary-primary">{{ summary_data.primary }}</div>
+  {% if summary_data.secondary %}
+    <div class="component-summary-secondary">{{ summary_data.secondary }}</div>
+  {% endif %}
+  <div class="component-summary-meta">
+    {% for key, value in summary_data.metadata %}
+      <span class="meta-item">{{ key }}: {{ value }}</span>
+    {% endfor %}
+  </div>
+</div>
 ```
 
-### Component-Specific Views
+### CSS Classes
 
-```php
-// Create a view programmatically
-$view = View::create([
-  'id' => 'button_components',
-  'label' => 'Button Components',
-  'base_table' => 'node_field_data',
-  'display' => [
-    'default' => [
-      'display_plugin' => 'component_display',
-      'display_options' => [
-        'filters' => [
-          'component_type' => [
-            'plugin_id' => 'component_type',
-            'value' => ['button'],
-          ],
-        ],
-      ],
-    ],
-  ],
-]);
-$view->save();
+Component Views provides comprehensive CSS classes for styling:
+
+```css
+/* Field wrapper classes */
+.component-views-field
+.component-views-mode-{full|summary|list|compact}
+.component-views-count-{number}
+
+/* Individual component classes */
+.component-views-item
+.component-views-{component-type}
+.component-views-delta-{number}
+.component-views-animated
+
+/* Display mode specific classes */
+.component-views-summary
+.component-views-list-item
+.component-views-compact
+
+/* Filter classes */
+.component-views-filter
+.component-views-filter-exposed
+.component-views-filter-search
 ```
 
-### Custom Display Mode
+### JavaScript Behaviors
 
-```php
-/**
- * Add custom display mode to component field.
- */
-function mymodule_component_field_display_modes_alter(&$modes) {
-  $modes['gallery'] = [
-    'label' => t('Gallery View'),
-    'description' => t('Optimized for image-heavy components'),
-  ];
-}
-```
-
-## Performance Tips
-
-### 1. **Choose Appropriate Display Modes**
-```php
-// For listings: use 'list' or 'compact'
-// For detail pages: use 'full'  
-// For overviews: use 'summary'
-```
-
-### 2. **Configure Caching**
-```php
-// High-traffic sites: 'aggressive' caching
-// Dynamic content: 'intelligent' caching
-// Development: 'none' or 'basic'
-```
-
-### 3. **Use Component Preloading**
-```php
-// Enable for views with multiple component types
-'component_preload' => TRUE
-```
-
-### 4. **Limit Component Count**
-```php
-// For performance, limit components per page
-'limit_components' => 50
-```
-
-### 5. **Use Lazy Loading**
-```php
-// For long lists of components
-'component_lazy_load' => TRUE,
-'component_batch_size' => 20
-```
-
-## Troubleshooting
-
-### Common Issues
-
-#### Components Not Appearing in Filter
-```php
-// Check component discovery
-drush eval "print_r(\Drupal::service('component_field.discovery')->discoverComponents());"
-
-// Clear caches
-drush cr
-
-// Refresh component discovery
-drush eval "\Drupal::service('component_field.discovery')->clearCache();"
-```
-
-#### Performance Issues
-```php
-// Enable query logging
-$GLOBALS['conf']['db_log_queries'] = TRUE;
-
-// Check component complexity
-$helper = \Drupal::service('component_views.helper');
-$stats = $helper->getComponentUsageStats();
-```
-
-#### JavaScript Errors
 ```javascript
-// Check for component data
-console.log(drupalSettings.componentViews);
+// Component Views provides several Drupal behaviors
 
-// Verify behaviors are attaching
-Drupal.behaviors.componentViewsField.attach(document, drupalSettings);
+// Field enhancements
+Drupal.behaviors.componentViewsField = {
+  attach: function (context, settings) {
+    // Add interactive features to component displays
+    $('.component-views-item', context).once('component-views').each(function() {
+      // Add hover effects, click handlers, etc.
+    });
+  }
+};
+
+// Filter enhancements
+Drupal.behaviors.componentViewsFilter = {
+  attach: function (context, settings) {
+    // Enhance exposed filters with search and statistics
+    $('.component-views-filter input[type="search"]', context).once('search').on('input', function() {
+      // Live search functionality
+    });
+  }
+};
+
+// Admin interface enhancements
+Drupal.behaviors.componentViewsAdmin = {
+  attach: function (context, settings) {
+    // Admin UI improvements
+    $('.views-admin .component-views-options', context).once('admin').each(function() {
+      // Add configuration helpers
+    });
+  }
+};
 ```
 
-### Debug Mode
+### Custom JavaScript Integration
 
-Enable debug information for administrators:
-
-```php
-// In views field configuration
-'show_debug_info' => TRUE
-
-// Check JavaScript console for:
-// - Component load times
-// - Configuration data
-// - Performance metrics
-```
-
-## Integration Examples
-
-### With Layout Builder
-
-```php
-/**
- * Add component views blocks to Layout Builder.
- */
-function mymodule_layout_builder_blocks_alter(&$blocks) {
-  $blocks['component_gallery'] = [
-    'label' => t('Component Gallery'),
-    'category' => t('Components'),
-    'class' => 'Drupal\mymodule\Plugin\Block\ComponentGalleryBlock',
-  ];
+```javascript
+// Access component data in JavaScript
+if (drupalSettings.componentViews) {
+  const components = drupalSettings.componentViews.components;
+  const usageStats = drupalSettings.componentViews.usageStats;
+  
+  // Use component data for custom functionality
+  Object.keys(components).forEach(type => {
+    console.log(`Component ${type} used ${usageStats[type] || 0} times`);
+  });
 }
+
+// Listen for component rendering events
+$(document).on('componentField:component:rendered', function(e, data) {
+  console.log('Component rendered in view:', data.type, data.config);
+});
 ```
 
-### With Search API
+## Advanced Integration
+
+### Search API Integration
 
 ```php
 /**
- * Index component data for search.
+ * Add component content to search index.
  */
 function mymodule_search_api_alter_callback(&$value, $type) {
   if ($type === 'component_field') {
-    // Extract searchable text from components
     $searchable_text = '';
     foreach ($value as $component) {
-      $searchable_text .= ' ' . $component['label'];
-      // Add configuration text
+      $searchable_text .= ' ' . $component['type'];
       if (isset($component['config']['label'])) {
         $searchable_text .= ' ' . $component['config']['label'];
       }
+      // Add other searchable component properties
     }
     $value = $searchable_text;
   }
 }
 ```
 
-### With REST API
+### REST API Integration
 
 ```php
 /**
- * Expose component views via REST.
+ * Expose component views via REST API.
  */
 function mymodule_rest_resource_alter(&$resources) {
   $resources['component_views'] = [
     'class' => 'Drupal\mymodule\Plugin\rest\resource\ComponentViewsResource',
     'methods' => ['GET'],
     'formats' => ['json'],
+    'authentication' => ['basic_auth'],
+  ];
+}
+```
+
+### Custom Views Plugins
+
+```php
+/**
+ * Add custom Views plugins for components.
+ */
+function mymodule_views_plugins_alter(array &$plugins) {
+  $plugins['field']['custom_component_renderer'] = [
+    'id' => 'custom_component_renderer',
+    'title' => t('Custom Component Renderer'),
+    'help' => t('Custom rendering for component fields.'),
+    'class' => 'Drupal\mymodule\Plugin\views\field\CustomComponentRenderer',
   ];
 }
 ```
@@ -596,16 +461,31 @@ function mymodule_rest_resource_alter(&$resources) {
  */
 class ComponentViewsTest extends KernelTestBase {
   
+  protected static $modules = ['component_field', 'component_views', 'views'];
+  
   public function testComponentFilter() {
-    // Create test data
+    // Create test content with components
     $this->createComponentContent();
     
-    // Test filter
+    // Test component type filter
     $view = Views::getView('test_component_view');
     $view->setFilter('component_type', 'button');
     $view->execute();
     
     $this->assertCount(1, $view->result);
+    $this->assertEquals('button', $view->result[0]->_entity->field_component_field[0]->component_type);
+  }
+  
+  public function testComponentFieldDisplay() {
+    $view = Views::getView('test_component_view');
+    $view->setDisplay('default');
+    
+    $field = $view->field['field_component_field'];
+    $this->assertInstanceOf(ComponentField::class, $field);
+    
+    // Test display modes
+    $field->options['display_mode'] = 'summary';
+    $this->assertEquals('summary', $field->options['display_mode']);
   }
 }
 ```
@@ -614,15 +494,18 @@ class ComponentViewsTest extends KernelTestBase {
 
 ```php
 /**
- * Test component views UI.
+ * Test component views UI integration.
  */
 class ComponentViewsUITest extends BrowserTestBase {
   
+  protected static $modules = ['component_field', 'component_views', 'views_ui'];
+  
   public function testViewsIntegration() {
-    $this->drupalLogin($this->adminUser);
-    $this->drupalGet('/admin/structure/views/add');
+    $admin_user = $this->createUser(['administer views']);
+    $this->drupalLogin($admin_user);
     
     // Test creating view with component field
+    $this->drupalGet('/admin/structure/views/add');
     $edit = [
       'label' => 'Test Component View',
       'id' => 'test_component_view',
@@ -631,27 +514,97 @@ class ComponentViewsUITest extends BrowserTestBase {
     
     // Add component field
     $this->clickLink('Add field');
-    // ... test continues
+    $this->assertSession()->pageTextContains('Component Field');
+    
+    // Test filter configuration
+    $this->clickLink('Add filter');
+    $this->assertSession()->pageTextContains('Component Type');
   }
 }
+```
+
+## Troubleshooting
+
+### Common Issues
+
+#### No Components Appear in Views
+1. **Check Component Field**: Ensure Component Field module is enabled and working
+2. **Verify Discovery**: Visit `/admin/structure/component-field` to refresh component discovery
+3. **Check Permissions**: Ensure users have permission to view components
+4. **Clear Caches**: Run `drush cr` to clear all caches
+
+#### Poor Performance
+1. **Enable Caching**: Configure appropriate cache settings for your views
+2. **Limit Results**: Use pagination and limit the number of results per page
+3. **Optimize Display Mode**: Use 'List' or 'Compact' mode for large datasets
+4. **Database Optimization**: Ensure proper database indexing
+
+#### Filter Not Working
+1. **Check Field Configuration**: Ensure component field is properly configured
+2. **Verify Component Types**: Check that components exist and are discoverable
+3. **Review Permissions**: Ensure proper field and component permissions
+4. **Debug Queries**: Enable query logging to troubleshoot filter queries
+
+### Debugging
+
+#### Enable Debug Logging
+```php
+// Add to settings.php for debugging
+$config['system.logging']['error_level'] = 'verbose';
+
+// Component Views specific logging
+\Drupal::logger('component_views')->debug('Debug message: @data', ['@data' => print_r($data, TRUE)]);
+```
+
+#### Performance Profiling
+```php
+// Profile component rendering performance
+$start = microtime(TRUE);
+$components = $discovery->discoverComponents();
+$discovery_time = microtime(TRUE) - $start;
+
+\Drupal::logger('component_views')->info('Component discovery took @time seconds', [
+  '@time' => number_format($discovery_time, 4)
+]);
 ```
 
 ## Contributing
 
 ### Development Setup
 
-1. Clone the repository
-2. Install dependencies: `composer install`
-3. Run tests: `phpunit`
-4. Check coding standards: `phpcs`
+```bash
+# Clone the repository
+git clone [repository-url]
+cd component_views
+
+# Install development dependencies
+composer install --dev
+
+# Run coding standards check
+vendor/bin/phpcs --standard=Drupal src/
+
+# Run tests
+vendor/bin/phpunit tests/
+```
 
 ### Reporting Issues
 
-Please report issues on the project's issue queue with:
-- Steps to reproduce
-- Expected vs actual behavior  
-- Environment details
-- Error messages or logs
+When reporting issues, please include:
+
+1. **Steps to Reproduce**: Clear, numbered steps
+2. **Expected vs Actual Behavior**: What should happen vs what actually happens
+3. **Environment Details**: Drupal version, PHP version, module versions
+4. **Error Messages**: Complete error messages and stack traces
+5. **Configuration**: Views configuration export if relevant
+
+### Feature Requests
+
+For feature requests, please:
+
+1. **Search Existing Issues**: Check if the feature is already requested
+2. **Provide Use Case**: Explain the business need and user story
+3. **Include Examples**: Mockups, wireframes, or examples from other systems
+4. **Consider Alternatives**: Mention any workarounds you've considered
 
 ## License
 
@@ -659,6 +612,14 @@ GPL-2.0-or-later
 
 ## Support
 
-- Documentation: See this README
-- Issue queue: [Project issues]
-- Community support: Drupal Slack #components channel
+- **Documentation**: This README and inline code documentation
+- **Issue Queue**: [Component Views Issue Queue]
+- **Community Support**: Drupal Slack #components channel
+- **Professional Support**: Available through Drupal service providers
+
+## Related Modules
+
+- **Component Field**: Required dependency for component discovery and field functionality
+- **Single Directory Components**: Core Drupal SDC system
+- **Views**: Core Drupal Views system for listing and filtering content
+- **Field API**: Core Drupal field system for storing component data
